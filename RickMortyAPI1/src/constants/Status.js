@@ -6,7 +6,7 @@ module.exports = {
     },
     400: {
         message: 'Bad Request',
-        description: '',
+        description: 'The request syntax is invalid',
         code: 400
     },
     404: {
@@ -16,7 +16,7 @@ module.exports = {
     },
     500: {
         message: 'Internal Server Error',
-        description: 'The request could not handle the request',
+        description: 'The server could not handle the request',
         code: 500
     },
     501: {

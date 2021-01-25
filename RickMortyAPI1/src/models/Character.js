@@ -14,6 +14,7 @@ const CharacterSchema = new Schema({
     episode: { type: Array },
     url: { type: String },
     created: { type: Date, default: Date.now },
+    __v: { type: Number, select: false },
+    versionKey: false
 });
-
 module.exports = mongoose.model('Character', CharacterSchema);

@@ -1,13 +1,11 @@
-const { Status } = require('../models/index');
-const characters = require('./characters');
-const episodes = require('./episodes');
+const Status = require('../constants/Status');
 
 module.exports = app => {
     // Set all the headers to send to the client
     app.use((req, res, next) => {
-        res.append('Access-Control-Allow-Origin', '*');
-        res.append('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
         res.append('Access-Control-Allow-Headers', 'Origin, Content-Type, Accept');
+        res.append('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+        res.append('Access-Control-Allow-Origin', '*');
         res.append('Content-Type', 'application/json');
         res.append('Cache-Control', 'no-cache');
         next();

@@ -1,14 +1,16 @@
-const { ApiQuery, Character, Status } = require('../models/index');
+const { characterMethods, characterByIdMethods } = require('../constants/methodsByRoute');
+const { ApiQuery, Character } = require('../models/index');
 const { basePath, character } = require('./pathNames');
+const Status = require('../constants/Status');
 const { Router } = require('express');
 const router = Router();
 
 // Check if the method requested is valid for each endpoint.
 router.all(`/${basePath}/${character}/`, (req, res, next) => {
-    _ = req.method === 'GET' ? next() : res.status(501).json(Status[501]);
+    _ = characterMethods[req.method] ? next() : res.status(501).json(Status[501]);
 });
 router.all(`/${basePath}/${character}/:id`, (req, res, next) => {
-    _ = req.method === 'GET' ? next() : res.status(501).json(Status[501]);
+    _ = characterByIdMethods[req.method] ? next() : res.status(501).json(Status[501]);
 });
 /* router.all(`${root}/${character}`, async(req, res) => {
     const characters = req.method === 'GET' ? await Character.find({}, { _id: 0 }) : Status[501];
@@ -20,23 +22,26 @@ router.get(`/${basePath}/${character}`, async(req, res) => {
     const pageSelected = ApiQuery.info.page;
     const idEnd = ApiQuery.info.pageSize * pageSelected;
     const idStart = ApiQuery.info.pageSize * (pageSelected - 1) + 1;
-    ApiQuery.results = await Character.find({ $and: [{ id: { $gte: idStart } }, { id: { $lte: idEnd } }] }, { _id: 0 });
+    // ApiQuery.results = await Character.find({ $and: [{ id: { $gte: idStart } }, { id: { $lte: idEnd } }] }, { _id: 0 });
+    ApiQuery.results = await Character.find({}, { _id: 0 }).where('id').gte(idStart).lte(idEnd);
     res.status(200).json(ApiQuery);
 });
 router.get(`/${basePath}/${character}/:id`, async(req, res) => {
-    const body = await checkIfCharacterExists(req.params.id);
-    const bodyResponse = body ? body.length ? bodyToArrayOrJson(body) : Status[404] : Status[400];
-    res.status(bodyResponse.code || 200).json(bodyResponse);
+    const { body, code } = await checkIfCharacterExists(req.params.id);
+    res.status(code).json(body);
 });
 
 //Check if the body contains one single character or many of them.
-const bodyToArrayOrJson = (body) => body.length === 1 ? body[0] : body;
-// Check if the character exists on the database, otherwise return null.
+const bodyToArrayOrJson = body => body.length === 1 ? body[0] : body;
+// Check if the character exists on the database.
 async function checkIfCharacterExists(id) {
-    let body = null;
-    try { body = await Character.find({ id: id.split(',').map(param => +param) }, { _id: 0 }); } //
-    catch (error) {}
-    return body;
+    let body = Status[400];
+    let code;
+    try {
+        body = await Character.find({ id: id.split(',') }, { _id: 0 });
+        [code, body] = body.length ? [200, bodyToArrayOrJson(body)] : [404, Status[404]];
+    } catch (error) { code = 400; }
+    return { body, code };
 }
 // Set the general info depending on the params sent by the client.
 async function setApiQueryProperties(queries) {
