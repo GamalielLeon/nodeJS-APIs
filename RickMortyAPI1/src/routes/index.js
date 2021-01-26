@@ -1,4 +1,7 @@
 const Status = require('../constants/Status');
+const episodeRoutes = require('./episodes');
+const characterRoutes = require('./characters');
+const { basePath, character, episode } = require('./pathNames');
 
 module.exports = app => {
     // Set all the headers to send to the client
@@ -11,8 +14,8 @@ module.exports = app => {
         next();
     });
     // Endpoints.
-    app.use(require('./characters'));
-    app.use(require('./episodes'));
+    app.use(`/${basePath}/${character}`, characterRoutes);
+    app.use(`/${basePath}/${episode}`, episodeRoutes);
     // If no endpoint is found.
     app.use((req, res) => res.status(404).json(Status[404]));
 };
